@@ -1,0 +1,40 @@
+// Jenkinsfile.pr - commons-api : analyse des pull requests (job multibranch dedie aux PR).
+// Le Jenkinsfile de la racine reste reserve aux builds de branches.
+//
+// Meme regle pour toutes les PR : compilation + tests unitaires. Rien n'est publie : les
+// microservices construisent commons-api depuis ses sources dans leurs propres builds de PR
+// (voir le Jenkinsfile.pr de msname-service). Pas de SonarQube sur la librairie.
+
+pipeline {
+    agent { label 'build-agent' }
+
+    tools {
+        maven 'Maven-3.9'
+        jdk 'JDK-17'
+    }
+
+    options {
+        timestamps()
+        // Un nouveau push sur la PR rend le build en cours obsolete.
+        disableConcurrentBuilds(abortPrevious: true)
+        buildDiscarder(logRotator(numToKeepStr: '30'))
+        timeout(time: 20, unit: 'MINUTES')
+    }
+
+    stages {
+        stage('Build & Tests') {
+            steps {
+                // Depot Maven local propre au job : aucun ~/.m2 partage entre builds concurrents.
+                configFileProvider([configFile(fileId: 'maven-nexus-settings', variable: 'MAVEN_SETTINGS')]) {
+                    sh 'mvn -B -ntp -s "$MAVEN_SETTINGS" -Dmaven.repo.local="$WORKSPACE/.m2/repository" clean verify'
+                }
+            }
+        }
+    }
+
+    post {
+        always {
+            junit testResults: 'target/surefire-reports/*.xml', allowEmptyResults: true
+        }
+    }
+}
