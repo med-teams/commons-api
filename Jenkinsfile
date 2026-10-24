@@ -4,7 +4,7 @@
 // dans le .m2 local de l'agent (voir note plus bas si vous passez a Nexus).
 
 pipeline {
-    agent { label 'build-agent' }   // meme agent que msname-service pour partager le cache .m2
+    agent { label 'build-agent' }   // meme agent que catalog-service pour partager le cache .m2
 
     tools {
         maven 'Maven-3.9'

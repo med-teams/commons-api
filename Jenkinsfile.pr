@@ -3,7 +3,7 @@
 //
 // Meme regle pour toutes les PR : compilation + tests unitaires. Rien n'est publie : les
 // microservices construisent commons-api depuis ses sources dans leurs propres builds de PR
-// (voir le Jenkinsfile.pr de msname-service). Pas de SonarQube sur la librairie.
+// (voir le Jenkinsfile.pr de catalog-service). Pas de SonarQube sur la librairie.
 
 pipeline {
     agent { label 'build-agent' }
